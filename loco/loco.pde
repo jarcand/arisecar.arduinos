@@ -33,11 +33,6 @@ int d = 0;
 Servo serMotor1;
 Servo serMotor2;
 
-#define M_BUF 4
-byte mIdx = 0;
-int m1Buf[M_BUF];
-int m2Buf[M_BUF];
-
 int mWC = 0;
 
 byte noMsg = 0;
@@ -59,11 +54,6 @@ void setup() {
 
   serMotor1.attach(pinMotor1);
   serMotor2.attach(pinMotor2);
-
-  for (int i = 0; i < M_BUF; i++) {
-    m1Buf[i] = 1500 + M1_CAL;
-    m2Buf[i] = 1500 + M2_CAL;
-  }
 }
 
 void loop() {
@@ -193,40 +183,10 @@ void outputRC() {
   if (1500 - DEADBAND <= m2 && m2 <= 1500 + DEADBAND) {
     m2 = 1500 + M2_CAL;
   }
-
-  m1Buf[mIdx] = m1;
-  m2Buf[mIdx] = m2;
-  mIdx = (mIdx + 1) % M_BUF;
-
-  unsigned long m1Tot = 0;
-  unsigned long m2Tot = 0;
-  byte m1Count = 0;
-  byte m2Count = 0;
-  for (int i = 0; i < M_BUF; i++) {
-    m1Tot += m1Buf[i];
-    if (m1Buf[i] > 0) {
-      m1Count++;
-    }
-    m2Tot += m2Buf[i];
-    if (m2Buf[i] > 0) {
-      m2Count++;
-    }
-  }
-
-  int m1b = m1Tot / m1Count;
-  int m2b = m2Tot / m2Count;
-
-  if (mWC++ % 20 == 0) {
-    // Update the motors
-    serMotor1.writeMicroseconds(m1b);
-    serMotor2.writeMicroseconds(3000 - m2b);
-
-    Serial.print(m1b, DEC);
-    Serial.print(",");
-    Serial.print(m2b, DEC);
-    Serial.println(",");
-  }
-
+  
+  serMotor1.writeMicroseconds(m1);
+  serMotor2.writeMicroseconds(3000 - m2);
+  
 }
 
 void failsafe() {
