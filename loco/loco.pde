@@ -26,7 +26,7 @@ const byte pinMotor2   = 10;
 
 byte KSo, KSi;
 byte motor1t, motor2t;
-int motor1s, motor2s;
+short motor1s, motor2s;
 int d = 0;
 
 // ------------------------------------------------------------------------
@@ -121,8 +121,8 @@ void sendToComp() {
     Serial.write((uint8_t) 0);
     Serial.write(motor1t);
     Serial.write(motor2t);
-    writeShort(0);
-    writeShort(0);
+    writeShort(motor1s);
+    writeShort(motor1t);
     writeShort(0);
     writeShort(0);
     writeShort(0);
@@ -144,10 +144,18 @@ void updateVals() {
   // Update the Java GPIO outputs
   digitalWrite(pinKSo, KSo);
 
-  if (rcAuto > 1500) {
-    updateSetpointsPC();
-  } else {
+  // Check if RC transmitter is off
+  if (rcAuto < 1000) {
+    motor1s = 1500;
+    motor2s = 1500;
+    
+  // Check if in RC/RF mode
+  } else if (rcAuto < 1500) {
     updateSetpointsRC();
+    
+  // Otherwise in autonomous/PC mode
+  } else {
+    updateSetpointsPC();
   }
 
   // Apply deadbands to the motor outputs
@@ -158,6 +166,7 @@ void updateVals() {
     motor2s = 1500;
   }
   
+  // Write the motor outputs
   serMotor1.writeMicroseconds(motor1s + M1_CAL);
   serMotor2.writeMicroseconds(3000 - motor2s - M2_CAL);
 }
