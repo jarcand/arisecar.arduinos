@@ -26,6 +26,7 @@ const byte pinMotor2   = 10;
 
 byte KSo, KSi;
 byte motor1t, motor2t;
+int motor1s, motor2s;
 int d = 0;
 
 // ------------------------------------------------------------------------
@@ -144,19 +145,26 @@ void updateVals() {
   digitalWrite(pinKSo, KSo);
 
   if (rcAuto > 1500) {
-    // Update the motors
-    serMotor1.write(motor1t);
-    serMotor2.write(180 - motor2t);
-
-    Serial.print(motor1t, DEC);
-    Serial.print(",");
-    Serial.print(motor2t, DEC);
-    Serial.print(",");
     
+    // Update the setpoints based on the targets
+    motor1s = map(motor1t, 0, 180, 1100, 1900);
+    motor2s = map(motor2t, 0, 180, 1100, 1900);
+
   } else {
 
     outputRC();
   }
+
+  // Apply deadbands to the motor outputs
+  if (1500 - DEADBAND <= motor1s && motor1s <= 1500 + DEADBAND) {
+    motor1s = 1500;
+  }
+  if (1500 - DEADBAND <= motor2s && motor2s <= 1500 + DEADBAND) {
+    motor2s = 1500;
+  }
+  
+  serMotor1.writeMicroseconds(motor1s + M1_CAL);
+  serMotor2.writeMicroseconds(3000 - motor2s - M2_CAL);
 }
 
 void outputRC() {
@@ -171,19 +179,8 @@ void outputRC() {
   float thf = (th - 1500) / 500.0;
   float stf = (st - 1500) / 500.0;
 
-  int m1 = constrain((thf + stf) * 500 + 1500, 1000, 2000) + M1_CAL;
-  int m2 = constrain((thf - stf) * 500 + 1500, 1000, 2000) + M2_CAL;
-
-  if (1500 - DEADBAND <= m1 && m1 <= 1500 + DEADBAND) {
-    m1 = 1500 + M1_CAL;
-  }
-  if (1500 - DEADBAND <= m2 && m2 <= 1500 + DEADBAND) {
-    m2 = 1500 + M2_CAL;
-  }
-  
-  serMotor1.writeMicroseconds(m1);
-  serMotor2.writeMicroseconds(3000 - m2);
-  
+  motor1s = constrain((thf + stf) * 500 + 1500, 1000, 2000);
+  motor2s = constrain((thf - stf) * 500 + 1500, 1000, 2000);
 }
 
 void failsafe() {
