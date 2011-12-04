@@ -9,6 +9,7 @@
 
 #define DEBUG     true
 #define DEADBAND   20
+#define MOTOR_RAMP 50
 #define M1_CAL    -5
 #define M2_CAL     4
 
@@ -173,9 +174,18 @@ void updateVals() {
 
 void updateSetpointsPC() {
   
-  // Update the setpoints based on the targets
-  motor1s = map(motor1t, 0, 180, 1100, 1900);
-  motor2s = map(motor2t, 0, 180, 1100, 1900);
+  // Convert the angles to pulse lengths
+  short m1t = map(motor1t, 0, 180, 1100, 1900);
+  short m2t = map(motor2t, 0, 180, 1100, 1900);
+  
+  // Calculate the difference between the setpoints and the targets,
+  // and constrain their size
+  short m1d = constrain(motor1t - motor1s, -MOTOR_RAMP, MOTOR_RAMP);
+  short m2d = constrain(motor2t - motor2s, -MOTOR_RAMP, MOTOR_RAMP);
+  
+  // Make the changes to the setpoints
+  motor1s += m1d;
+  motor2s += m2d;
 }
 
 void updateSetpointsRC() {
