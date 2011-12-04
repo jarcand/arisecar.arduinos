@@ -145,14 +145,9 @@ void updateVals() {
   digitalWrite(pinKSo, KSo);
 
   if (rcAuto > 1500) {
-    
-    // Update the setpoints based on the targets
-    motor1s = map(motor1t, 0, 180, 1100, 1900);
-    motor2s = map(motor2t, 0, 180, 1100, 1900);
-
+    updateSetpointsPC();
   } else {
-
-    outputRC();
+    updateSetpointsRC();
   }
 
   // Apply deadbands to the motor outputs
@@ -167,7 +162,14 @@ void updateVals() {
   serMotor2.writeMicroseconds(3000 - motor2s - M2_CAL);
 }
 
-void outputRC() {
+void updateSetpointsPC() {
+  
+  // Update the setpoints based on the targets
+  motor1s = map(motor1t, 0, 180, 1100, 1900);
+  motor2s = map(motor2t, 0, 180, 1100, 1900);
+}
+
+void updateSetpointsRC() {
 
   if (rcThrust == 0 || rcSteer == 0) {
     return;
