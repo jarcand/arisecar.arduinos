@@ -60,11 +60,9 @@ void loop() {
   if (receiveFromComp()) {
     noMsg = 0;
     flaFast = false;
-  } 
-  else if (noMsg < noMsgMax) {
+  } else if (noMsg < noMsgMax) {
     noMsg++;
-  } 
-  else if (noMsg == noMsgMax) {
+  } else if (noMsg == noMsgMax) {
     failsafe();
     flaFast = true;
   }
@@ -113,8 +111,7 @@ void sendToComp() {
        Serial.print(rcSpare, DEC);
        Serial.println("");*/
     }
-  } 
-  else {
+  } else {
     Serial.write(0x55);
     Serial.write(0xFF);
     Serial.write(0xAA);
@@ -155,8 +152,8 @@ void updateVals() {
     Serial.print(",");
     Serial.print(motor2, DEC);
     Serial.print(",");
-  } 
-  else {
+    
+  } else {
 
     outputRC();
   }
@@ -206,8 +203,7 @@ void updateFlashing() {
   flaCounter++;
   if (flaCounter / (flaFast ? 2 : 20) % 2 == 0) {
     digitalWrite(pinLed, LOW);
-  } 
-  else {
+  } else {
     digitalWrite(pinLed, HIGH);
   }
 }
