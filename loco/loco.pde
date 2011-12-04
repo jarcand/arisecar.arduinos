@@ -25,7 +25,7 @@ const byte pinMotor2   = 10;
 // ------------------------------------------------------------------------
 
 byte KSo, KSi;
-byte motor1, motor2;
+byte motor1t, motor2t;
 int d = 0;
 
 // ------------------------------------------------------------------------
@@ -87,8 +87,8 @@ boolean receiveFromComp() {
     return false;
 
   byte gpio = Serial.read();
-  motor1 = Serial.read();
-  motor2 = Serial.read();
+  motor1t = Serial.read();
+  motor2t = Serial.read();
 
   for (int i = 0; i < 25; i++) {
     Serial.read();
@@ -118,8 +118,8 @@ void sendToComp() {
     Serial.write(devID);
 
     Serial.write((uint8_t) 0);
-    Serial.write(motor1);
-    Serial.write(motor2);
+    Serial.write(motor1t);
+    Serial.write(motor2t);
     writeShort(0);
     writeShort(0);
     writeShort(0);
@@ -145,12 +145,12 @@ void updateVals() {
 
   if (rcAuto > 1500) {
     // Update the motors
-    serMotor1.write(motor1);
-    serMotor2.write(180 - motor2);
+    serMotor1.write(motor1t);
+    serMotor2.write(180 - motor2t);
 
-    Serial.print(motor1, DEC);
+    Serial.print(motor1t, DEC);
     Serial.print(",");
-    Serial.print(motor2, DEC);
+    Serial.print(motor2t, DEC);
     Serial.print(",");
     
   } else {
@@ -187,8 +187,8 @@ void outputRC() {
 }
 
 void failsafe() {
-  motor1 = 90;
-  motor2 = 90;
+  motor1t = 90;
+  motor2t = 90;
   KSo = 0;
 }
 
