@@ -7,14 +7,14 @@
 #include <Servo.h>
 #include "RcRead.h"
 
-#define DEBUG     true
+#define DEBUG     false
 #define DEADBAND   20
 #define MOTOR_RAMP 50
-#define M1_CAL    -5
-#define M2_CAL     4
+#define M1_CAL     0
+#define M2_CAL     8
 
 const byte devID       = 0x70;
-const byte noMsgMax    = 70;
+const byte noMsgMax    = 70;  
 const byte pinLed      = 13;
 
 const byte pinKSo      = 12;
@@ -37,7 +37,7 @@ Servo serMotor2;
 
 int mWC = 0;
 
-byte noMsg = 0;
+byte noMsg = noMsgMax;
 boolean flaFast = true;
 int flaCounter = 0;
 
@@ -102,38 +102,22 @@ boolean receiveFromComp() {
 }
 
 void sendToComp() {
+  writeByte(0x55);
+  writeByte(0xFF);
+  writeByte(0xAA);
+  writeByte(devID);
+
+  writeByte(0);
+  writeByte(motor1t);
+  writeByte(motor2t);
+  writeShort(motor1s);
+  writeShort(motor2s);
+  
+  for (int i = 0; i < 21; i++) {
+    Serial.write('.');
+  }
   if (DEBUG) {
-    if (d++ % 10 == 0) {
-      /*      Serial.print(rcThrust, DEC);
-       Serial.print(",");
-       Serial.print(rcSteer, DEC);
-       Serial.print(",");
-       Serial.print(rcAuto, DEC);
-       Serial.print(",");
-       Serial.print(rcSpare, DEC);
-       Serial.println("");*/
-    }
-  } else {
-    Serial.write(0x55);
-    Serial.write(0xFF);
-    Serial.write(0xAA);
-    Serial.write(devID);
-
-    Serial.write((uint8_t) 0);
-    Serial.write(motor1t);
-    Serial.write(motor2t);
-    writeShort(motor1s);
-    writeShort(motor1t);
-    writeShort(0);
-    writeShort(0);
-    writeShort(0);
-    writeShort(0);
-    writeShort(0);
-    writeShort(0);
-
-    for (int i = 0; i < 9; i++) {
-      Serial.write('.');
-    }
+    Serial.println();
   }
 }
 
@@ -180,8 +164,8 @@ void updateSetpointsPC() {
   
   // Calculate the difference between the setpoints and the targets,
   // and constrain their size
-  short m1d = constrain(motor1t - motor1s, -MOTOR_RAMP, MOTOR_RAMP);
-  short m2d = constrain(motor2t - motor2s, -MOTOR_RAMP, MOTOR_RAMP);
+  short m1d = constrain(m1t - motor1s, -MOTOR_RAMP, MOTOR_RAMP);
+  short m2d = constrain(m2t - motor2s, -MOTOR_RAMP, MOTOR_RAMP);
   
   // Make the changes to the setpoints
   motor1s += m1d;
@@ -207,14 +191,30 @@ void updateSetpointsRC() {
 void failsafe() {
   motor1t = 90;
   motor2t = 90;
+  motor1s = 1500;
+  motor2s = 1500;
   KSo = 0;
 }
 
 // ------------------------------------------------------------------------
 
+void writeByte(byte val) {
+  if (DEBUG) {
+    Serial.print(val, DEC);
+    Serial.print(':');
+  } else {
+    Serial.write(val);
+  }
+}
+
 void writeShort(short val) {
-  Serial.write(highByte(val));
-  Serial.write(lowByte(val));
+  if (DEBUG) {
+    Serial.print(val, DEC);
+    Serial.print(':');
+  } else {
+    Serial.write(highByte(val));
+    Serial.write(lowByte(val));
+  }
 }
 
 void updateFlashing() {
