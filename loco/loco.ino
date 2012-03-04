@@ -5,6 +5,7 @@
  * @refs    Based on code for the ARISE ASUV and the CSTM HHW.
  */
 #include <Servo.h>
+#include "RangeFinder.h"
 #include "RcRead.h"
 #include <Wire.h>
 
@@ -21,15 +22,24 @@ const byte pinLed      = 13;
 const byte pinMotor1   = 9;
 const byte pinMotor2   = 10;
 
+const int ADDR_RF1 = 0xE2 >> 1;
+const int ADDR_RF2 = 0XE4 >> 1;
+const int ADDR_RF3 = 0XE6 >> 1;
+
 // ------------------------------------------------------------------------
 
 byte motor1t, motor2t;
 short motor1s, motor2s;
-
-// ------------------------------------------------------------------------
+short rf1v, rf2v, rf3v;
 
 Servo serMotor1;
 Servo serMotor2;
+
+RangeFinder rf1(ADDR_RF1);
+RangeFinder rf2(ADDR_RF2);
+RangeFinder rf3(ADDR_RF3);
+
+// ------------------------------------------------------------------------
 
 byte noMsg = noMsgMax;
 boolean flaFast = true;
@@ -38,6 +48,7 @@ int flaCounter = 0;
 // ------------------------------------------------------------------------
 
 void setup() {
+  Wire.begin();
   Serial.begin(115200);
 
   rc_read_init();
@@ -136,6 +147,16 @@ void updateVals() {
   // Write the motor outputs
   serMotor1.writeMicroseconds(motor1s + M1_CAL);
   serMotor2.writeMicroseconds(3000 - motor2s - M2_CAL);
+  
+  // Read the range finders
+  rf1v = rf1.result();
+  rf2v = rf2.result();
+  rf3v = rf3.result();
+  
+  // Tell the range finders to start their ranging again
+  rf1.start();
+  rf2.start();
+  rf3.start();
 }
 
 void updateSetpointsPC() {
