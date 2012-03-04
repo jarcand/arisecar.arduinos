@@ -1,6 +1,6 @@
 /* @name    ARISE SecBot Locomotion Arduino Firmware
  * @author  Jeffrey Arcand <jeffrey.arcand@ariselab.ca>
- * @date    2011-11-23
+ * @date    2012-03-04
  * @license GPLv3
  * @refs    Based on code for the ARISE ASUV and the CSTM HHW.
  */
@@ -18,25 +18,18 @@ const byte devID       = 0x70;
 const byte noMsgMax    = 70;  
 const byte pinLed      = 13;
 
-const byte pinKSo      = 12;
-const byte pinKSi      = 8;
-
 const byte pinMotor1   = 9;
 const byte pinMotor2   = 10;
 
 // ------------------------------------------------------------------------
 
-byte KSo, KSi;
 byte motor1t, motor2t;
 short motor1s, motor2s;
-int d = 0;
 
 // ------------------------------------------------------------------------
 
 Servo serMotor1;
 Servo serMotor2;
-
-int mWC = 0;
 
 byte noMsg = noMsgMax;
 boolean flaFast = true;
@@ -50,10 +43,6 @@ void setup() {
   rc_read_init();
 
   pinMode(pinLed,  OUTPUT);
-
-  pinMode(pinKSo,  OUTPUT);
-  pinMode(pinKSi,  INPUT);
-  digitalWrite(pinKSi, LOW); // No pull-up resistor
 
   serMotor1.attach(pinMotor1);
   serMotor2.attach(pinMotor2);
@@ -89,15 +78,13 @@ boolean receiveFromComp() {
   if (Serial.read() != devID)
     return false;
 
-  byte gpio = Serial.read();
+  Serial.read();
   motor1t = Serial.read();
   motor2t = Serial.read();
 
   for (int i = 0; i < 25; i++) {
     Serial.read();
   }
-
-  KSo = bitRead(gpio, 0);
 
   return true;
 }
@@ -123,12 +110,6 @@ void sendToComp() {
 }
 
 void updateVals() {
-
-  // Read the kill switch input
-  KSi = digitalRead(pinKSi);
-
-  // Update the Java GPIO outputs
-  digitalWrite(pinKSo, KSo);
 
   // Check if RC transmitter is off
   if (rcAuto < 1000) {
@@ -194,7 +175,6 @@ void failsafe() {
   motor2t = 90;
   motor1s = 1500;
   motor2s = 1500;
-  KSo = 0;
 }
 
 // ------------------------------------------------------------------------
