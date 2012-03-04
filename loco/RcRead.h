@@ -1,8 +1,6 @@
 #ifndef RcRead_H
 #define RcRead_H
 
-#include <WProgram.h>
-
 const int pinRCThrust  = 2;
 const int pinRCSteer   = 4;
 const int pinRCAuto    = 3;

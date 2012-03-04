@@ -6,6 +6,7 @@
  */
 #include <Servo.h>
 #include "RcRead.h"
+#include <Wire.h>
 
 #define DEBUG     false
 #define DEADBAND   20
