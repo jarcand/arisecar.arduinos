@@ -1,13 +1,7 @@
 #ifndef RangeFinders_H
 #define RangeFinders_H
 
-#if ARDUINO >= 100
-  #include <Arduino.h>
-  #include <Wire.h>
-#else
-  #include <WProgram.h>
-  #include <Wire.h>
-#endif
+#include <Wire.h>
 
 short rangefinder_read(short);
 void rangefinder_read_start(short);
